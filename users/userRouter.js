@@ -14,7 +14,7 @@ router.post('/', validateUser, (req, res) => {
     })
 });
 
-router.post('/:id/posts', validateUserId, (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
   let newPost = req.body
   console.log(newPost)
   console.log(req.user.id)
@@ -47,12 +47,22 @@ router.get('/:id', validateUserId, (req, res) => {
     })
 });
 
-router.get('/:id/posts', (req, res) => {
-
+router.get('/:id/posts', validateUserId, (req, res) => {
+  users.getUserPosts(req.params.id)
+    .then(userPosts => {
+      res.status(200).json(userPosts)
+    })
+    .catch(error => {
+      res.status(500).json({error: "Error retrieving this user's posts" })
+    })
 });
 
-router.delete('/:id', (req, res) => {
-
+router.delete('/:id', validateUserId, (req, res) => {
+  users.remove(req.params.id)
+    .then(deleted => {
+      res.status(200).json({ message: "The user has been removed.", deleted })
+    })
+    .catch()
 });
 
 router.put('/:id', (req, res) => {
@@ -63,7 +73,6 @@ router.put('/:id', (req, res) => {
 
 function validateUserId(req, res, next) {
   const id = req.params.id
-  console.log(id)
   users.getById(id)
     .then(user => {
       if (user.id) {
@@ -78,7 +87,6 @@ function validateUserId(req, res, next) {
 }
 
 function validateUser(req, res, next) {
-  console.log(req.body)
   if (!req.body) {
     res.status(400).json({ message: 'missing user data' })
   } else if (!req.body.name) {
@@ -89,7 +97,13 @@ function validateUser(req, res, next) {
 };
 
 function validatePost(req, res, next) {
-
+  if (!req.body) {
+    res.status(400).json({ message: 'missing post data' })
+  } else if (!req.body.text) {
+    res.status(400).json({ message: 'missing required text field' })
+  } else {
+    next()
+  }
 };
 
 module.exports = router;
