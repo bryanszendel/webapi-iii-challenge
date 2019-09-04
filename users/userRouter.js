@@ -4,15 +4,10 @@ const posts = require('../posts/postDb')
 
 const router = express.Router();
 
-router.post('/', (req, res) => {
-  const newUser = req.body
-  users.insert(newUser)
+router.post('/', validateUser, (req, res) => {
+  users.insert(req.body)
     .then(result => {
-      if (newUser.name) {
         res.status(201).json(result)
-      } else {
-        res.status(400).json({ message: "Please include a name for the user"})
-      }
     })
     .catch(error => {
       res.status(500).json({ error: "There was an error creating the user"})
@@ -67,7 +62,7 @@ router.put('/:id', (req, res) => {
 //custom middleware
 
 function validateUserId(req, res, next) {
-  let id = req.params.id
+  const id = req.params.id
   console.log(id)
   users.getById(id)
     .then(user => {
@@ -83,7 +78,14 @@ function validateUserId(req, res, next) {
 }
 
 function validateUser(req, res, next) {
-
+  console.log(req.body)
+  if (!req.body) {
+    res.status(400).json({ message: 'missing user data' })
+  } else if (!req.body.name) {
+    res.status(400).json({ message: 'missing required name field' })
+  } else {
+    next()
+  }
 };
 
 function validatePost(req, res, next) {
