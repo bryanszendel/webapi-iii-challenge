@@ -62,11 +62,19 @@ router.delete('/:id', validateUserId, (req, res) => {
     .then(deleted => {
       res.status(200).json({ message: "The user has been removed.", deleted })
     })
-    .catch()
+    .catch(error => {
+      res.status(500).json({ error: "Error removing the user."})
+    })
 });
 
-router.put('/:id', (req, res) => {
-
+router.put('/:id', validateUserId, validateUser, (req, res) => {
+  users.update(req.params.id, req.body)
+    .then(updated => {
+      res.status(200).json({ message: "The user has been updated.", updated })
+    })
+    .catch(error => {
+      res.status(500).json({ error: "Error updating the user."})
+    })
 });
 
 //custom middleware
