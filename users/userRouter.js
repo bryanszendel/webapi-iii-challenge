@@ -7,10 +7,10 @@ router.post('/', (req, res) => {
   const newUser = req.body
   users.insert(newUser)
     .then(result => {
-      if (!newUser.name) {
-        res.status(400).json({ message: "Please include a name for the user"})
-      } else {
+      if (newUser.name) {
         res.status(201).json(result)
+      } else {
+        res.status(400).json({ message: "Please include a name for the user"})
       }
     })
     .catch(error => {
@@ -19,7 +19,15 @@ router.post('/', (req, res) => {
 });
 
 router.post('/:id/posts', (req, res) => {
-
+  userId = req.params.id
+  newPost = req.body
+  users.insert(newPost)
+    .then(result => {
+      validateUserId(userId)
+    })
+    .catch(error => {
+      res.status(500).json({ error: "Error saving the user post." })
+    })
 });
 
 router.get('/', (req, res) => {
