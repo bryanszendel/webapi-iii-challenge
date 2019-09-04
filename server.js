@@ -15,7 +15,7 @@ server.use(express.json())
 server.use(logger)
 
 server.use('/posts', postRouter)
-server.use('/users', validateUserId, userRouter)
+server.use('/users', userRouter)
 
 
 
@@ -33,14 +33,6 @@ function logger(req, res, next) {
   next()
 }
 
-function validateUserId(req, res, next) {
-  let id = req.params.id
-  if (id) {
-    res.status(201).json(res)
-    req.user = req.body
-  } else {
-    res.status(400).json({ message: "invalid user id"})
-  }
-}
+
 
 module.exports = server;

@@ -1,5 +1,6 @@
 const express = require('express');
 const users = require('./userDb')
+const posts = require('../posts/postDb')
 
 const router = express.Router();
 
@@ -18,12 +19,13 @@ router.post('/', (req, res) => {
     })
 });
 
-router.post('/:id/posts', (req, res) => {
-  userId = req.params.id
-  newPost = req.body
-  users.insert(newPost)
+router.post('/:id/posts', validateUserId, (req, res) => {
+  let newPost = req.body
+  console.log(newPost)
+  console.log(req.user.id)
+  posts.insert(newPost)
     .then(result => {
-      validateUserId(userId)
+      res.status(201).json(result)
     })
     .catch(error => {
       res.status(500).json({ error: "Error saving the user post." })
@@ -59,8 +61,27 @@ router.put('/:id', (req, res) => {
 //custom middleware
 
 function validateUserId(req, res, next) {
-
-};
+  let id = req.params.id
+  console.log(id)
+  users.getById(id)
+    .then(user => {
+      if (user.id) {
+        req.user = user
+        next()
+      }
+    })
+    .catch(error => {
+      res.status(400).json({ errorMessage: "invalid user ID"})
+      next()
+    })
+    
+  // if (id) {
+  //   req.user = req.body
+  //   next()
+  // } else {
+  //   res.status(400).json({ message: "invalid user id"})
+  // }
+}
 
 function validateUser(req, res, next) {
 
